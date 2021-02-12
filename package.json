@@ -7,13 +7,17 @@
     "@hapi/hapi": "^19.2.0",
     "@hapi/joi": "^17.1.1",
     "@prisma/client": "^2.16.0",
-    "date-fns": "^2.15.0"
+    "@sendgrid/mail": "^7.4.2",
+    "date-fns": "^2.15.0",
+    "hapi-auth-jwt2": "^10.1.0",
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
     "@prisma/cli": "^2.16.0",
     "@types/hapi__hapi": "^19.0.4",
     "@types/hapi__joi": "^17.1.6",
     "@types/jest": "^26.0.4",
+    "@types/jsonwebtoken": "^8.5.0",
     "jest": "^26.1.0",
     "ts-jest": "^26.1.2",
     "ts-node": "8.10.2",
@@ -26,8 +30,7 @@
     "test": "TEST=true jest",
     "compile": "tsc",
     "postgres:start": "docker-compose up -d",
-    "migrate:save": "prisma migrate --experimental save",
-    "migrate:up": "prisma migrate --experimental up --auto-approve --create-db",
+    "migrate": "prisma migrate dev --preview-feature",
     "prisma:generate": "prisma generate"
   },
   "engines": {

@@ -1,13 +1,30 @@
 -- CreateEnum
+CREATE TYPE "TokenType" AS ENUM ('EMAIL', 'API');
+
+-- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('STUDENT', 'TEACHER');
 
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
-    "firstName" TEXT NOT NULL,
-    "lastName" TEXT NOT NULL,
+    "firstName" TEXT,
+    "lastName" TEXT,
     "social" JSONB,
+
+    PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Token" (
+    "id" SERIAL NOT NULL,
+    "createAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "type" "TokenType" NOT NULL,
+    "emailToken" TEXT,
+    "valid" BOOLEAN NOT NULL,
+    "expiration" TIMESTAMP(3) NOT NULL,
+    "userId" INTEGER NOT NULL,
 
     PRIMARY KEY ("id")
 );
@@ -56,6 +73,12 @@ CREATE TABLE "TestResult" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User.email_unique" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Token.emailToken_unique" ON "Token"("emailToken");
+
+-- AddForeignKey
+ALTER TABLE "Token" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CourseEnrollment" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

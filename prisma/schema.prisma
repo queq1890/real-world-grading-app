@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -8,20 +8,41 @@ datasource db {
 }
 
 model User {
-  id        Int    @default(autoincrement()) @id
-  email     String @unique
-  firstName String
-  lastName  String
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  firstName String?
+  lastName  String?
   social    Json?
+  isAdmin   Boolean @default(false)
 
   // Relation fields
   courses     CourseEnrollment[]
   testResults TestResult[]       @relation(name: "results")
   testsGraded TestResult[]       @relation(name: "graded")
+  tokens      Token[]
+}
+
+model Token {
+  id         Int       @id @default(autoincrement())
+  createAt   DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  type       TokenType
+  emailToken String?   @unique
+  valid      Boolean   @default(true)
+  expiration DateTime
+
+  // Relation fields
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+enum TokenType {
+  EMAIL
+  API
 }
 
 model Course {
-  id            Int     @default(autoincrement()) @id
+  id            Int     @id @default(autoincrement())
   name          String
   courseDetails String?
 
@@ -44,19 +65,19 @@ model CourseEnrollment {
 }
 
 model Test {
-  id        Int      @default(autoincrement()) @id
+  id        Int      @id @default(autoincrement())
   updatedAt DateTime @updatedAt
   name      String
   date      DateTime
 
   // Relation Fields
-  courseId   Int
-  course     Course       @relation(fields: [courseId], references: [id])
+  courseId    Int
+  course      Course       @relation(fields: [courseId], references: [id])
   testResults TestResult[]
 }
 
 model TestResult {
-  id        Int      @default(autoincrement()) @id
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   result    Int // Percentage precise to one decimal point represented as `result * 10^-1`
 
