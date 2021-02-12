@@ -1,6 +1,7 @@
 import Hapi from '@hapi/hapi';
 import Joi from '@hapi/joi';
 import Boom from '@hapi/boom';
+import { API_AUTH_STATEGY } from './auth';
 
 interface UserInput {
   firstName: string;
@@ -38,6 +39,26 @@ const userInputValidator = Joi.object({
 });
 const createUserValidator = userInputValidator.tailor('create');
 const updateUserValidator = userInputValidator.tailor('update');
+
+// Pre-function to check if the authenticated user matches the requested user
+export async function isRequestedUserOrAdmin(
+  request: Hapi.Request,
+  h: Hapi.ResponseToolkit
+) {
+  // 👇 userId and isAdmin are populated by the `validateAPIToken` function
+  const { userId, isAdmin } = request.auth.credentials;
+  if (isAdmin) {
+    // If the user is an admin allow
+    return h.continue;
+  }
+  const requestedUserId = parseInt(request.params.userId, 10);
+  // 👇 Check that the requested userId matches the authenticated userId
+  if (requestedUserId === userId) {
+    return h.continue;
+  }
+  // The authenticated user is not authorized
+  throw Boom.forbidden();
+}
 
 async function getUserHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
   const { prisma } = request.server.app;
@@ -124,6 +145,11 @@ const usersPlugin = {
         path: '/users/{userId}',
         handler: getUserHandler,
         options: {
+          pre: [isRequestedUserOrAdmin],
+          auth: {
+            mode: 'required',
+            strategy: API_AUTH_STATEGY,
+          },
           validate: {
             params: Joi.object({
               userId: Joi.number().integer(),
